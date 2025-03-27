@@ -14,24 +14,6 @@ JS_LANGUAGE = Language(tsJavaScript.language())
 # Initialize the parser
 parser = Parser(JS_LANGUAGE)
 
-# Example JavaScript code (You can replace this with your code input)
-javascript_code = """
-function foo() {
-    console.log("Hello from foo!");
-}
-
-const bar = function() {
-    foo();
-}
-
-const baz = () => {
-    bar();
-    console.log("Hello from baz!");
-}
-
-foo();
-"""
-
 # Create a graph using NetworkX
 graph = nx.DiGraph()
 
@@ -48,6 +30,16 @@ def analyze_invocation_relations(src: str, graph: nx.DiGraph):
     # Queries to capture function definitions and calls
     function_definition_query = JS_LANGUAGE.query("""
     (function_declaration) @function_def
+
+    (lexical_declaration
+        (variable_declarator
+        name: (identifier) @name
+        value: [(arrow_function) (function_expression)]) @function_def)
+                                                  
+    (variable_declaration
+        (variable_declarator
+        name: (identifier) @name
+        value: [(arrow_function) (function_expression)]) @function_df)
     """)
 
     function_call_query = JS_LANGUAGE.query("""
@@ -60,7 +52,6 @@ def analyze_invocation_relations(src: str, graph: nx.DiGraph):
     for file in files:
         # Run the queries to capture function definitions
         with open(file, "r", encoding="utf-8") as file:
-            
             source_code = file.read()
             tree = parser.parse(bytes(source_code, "utf8"))
             function_definitions = function_definition_query.captures(tree.root_node)
