@@ -92,14 +92,10 @@ def analyze_invocation_relations(src: str, graph: nx.DiGraph):
 
 analyze_invocation_relations("./src", graph)
 
-def pretty_print(code_left, file_left, code_right, file_right, relation):
-    console = Console()
-    
-    table = Table(show_header=False, show_lines=True)
-    table.add_column("Code Segment 1", style="cyan", no_wrap=False)
-    table.add_column("Relation", style="yellow", justify="center")
-    table.add_column("Code Segment 2", style="green", no_wrap=False)
+def pretty_print(code_left, file_left, code_right, file_right, relation, table, console):
 
+    
+    
     # Format left column: code + file name in red
     left_column = Text(code_left, style="cyan")
     left_column.append(f"\n\n[{file_left}]", style="red")
@@ -109,8 +105,13 @@ def pretty_print(code_left, file_left, code_right, file_right, relation):
     right_column.append(f"\n\n[{file_right}]", style="red")
     
     table.add_row(left_column, relation, right_column)
-    
-    console.print(table)
+
+
+console = Console()
+table = Table(show_header=False, show_lines=True)
+table.add_column("Code Segment 1", style="cyan", no_wrap=False)
+table.add_column("Relation", style="yellow", justify="center")
+table.add_column("Code Segment 2", style="green", no_wrap=False)
 
 for edge in graph.edges(data=True):
 
@@ -125,8 +126,10 @@ for edge in graph.edges(data=True):
     file_right = target_node['node_object'].file_path
     relation = edge[2]['label'].name
 
-    pretty_print(code_left, file_left, code_right, file_right, relation)
+    pretty_print(code_left, file_left, code_right, file_right, relation, table, console), 
 
     # print("="*40)
+   
+console.print(table)
 
 
